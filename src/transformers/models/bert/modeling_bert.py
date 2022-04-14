@@ -856,6 +856,7 @@ BERT_INPUTS_DOCSTRING = r"""
             Whether or not to return a [`~utils.ModelOutput`] instead of a plain tuple.
 """
 
+import torch.fx
 
 @add_start_docstrings(
     "The bare Bert Model transformer outputting raw hidden-states without any specific head on top.",
@@ -970,7 +971,8 @@ class BertModel(BertPreTrainedModel):
         past_key_values_length = past_key_values[0][0].shape[2] if past_key_values is not None else 0
 
         if attention_mask is None:
-            attention_mask = torch.ones(((batch_size, seq_length + past_key_values_length)), device=device)
+            # attention_mask = torch.ones(((batch_size, seq_length + past_key_values_length)), device=device)
+            attention_mask = torch.fx.experimental.meta_tracer.ones_wrapper(((batch_size, seq_length + past_key_values_length)), device=device)
 
         if token_type_ids is None:
             if hasattr(self.embeddings, "token_type_ids"):
